@@ -45,36 +45,21 @@ echo "增加执行权限完成"
 echo "在/bin目录下软链接nginx"
 ln -s /usr/local/nginx/sbin/nginx /bin/nginx
 
-echo "启动nginx"
-/usr/local/nginx/sbin/nginx >/dev/null 2>&1
 echo "创建服务文件"
 echo "[Unit]
-
-Description=nginx
+Description=nginx - high performance web server
 
 After=network.target remote-fs.target nss-lookup.target
-
- 
 
 [Service]
 
 Type=forking
 
-PIDFile=/usr/local/nginx/logs/nginx.pid
-
-ExecStartPost=/bin/sleep 0.1
-
-ExecStartPre=/usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf
-
 ExecStart=/usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
 
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecReload=/usr/local/nginx/sbin/nginx -s reload
 
-ExecStop=/bin/kill -s QUIT $MAINPID
-
-PrivateTmp=true
-
- 
+ExecStop=/usr/local/nginx/sbin/nginx -s stop
 
 [Install]
 
@@ -82,11 +67,13 @@ WantedBy=multi-user.target
 
 " > /usr/lib/systemd/system/nginx.service
 
+echo "启动nginx"
+systemctl start nginx.service >/dev/null 2>&1
 echo "开机启动nginx.service"
 systemctl enable nginx.service >/dev/null 2>&1
 echo "将网站根目录软连接到家目录下"
 ln -s /usr/local/nginx/html ~/www
-
+ln -s /usr/local/nginx/conf ~/nginx_conf
 }
 InstallMysql(){
 echo "正在更新源..."
